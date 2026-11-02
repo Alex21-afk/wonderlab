@@ -1,0 +1,6 @@
+# Contraseñas y claves de este servidor (usa includes/config.local.example.php como plantilla)
+includes/config.local.php
+
+# Archivos subidos desde el panel (logo, fotos, videos); se conserva solo la protección
+uploads/*
+!uploads/.htaccess

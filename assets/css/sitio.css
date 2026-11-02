@@ -1,0 +1,148 @@
+/* Los colores --primario y --oscuro vienen del panel (Sitio web > General) */
+:root {
+    --primario: #b76e79;
+    --oscuro: #2b2024;
+    --suave: #faf6f4;
+    --fuente-titulos: 'Playfair Display', Georgia, serif;
+    --fuente-texto: 'Poppins', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body { font-family: var(--fuente-texto); color: #3d3437; background: #fff; }
+h1, h2, h3, .marca, .titulo-seccion { font-family: var(--fuente-titulos); color: var(--oscuro); }
+a { color: var(--primario); }
+.bg-suave { background: var(--suave); }
+
+/* Botones con el color de la marca */
+.btn-primario { background: var(--primario); border-color: var(--primario); color: #fff; border-radius: 50px; }
+.btn-primario:hover, .btn-primario:focus { background: var(--oscuro); border-color: var(--oscuro); color: #fff; }
+.btn-primario:disabled { background: var(--primario); border-color: var(--primario); opacity: .45; color: #fff; }
+.btn-outline-primario { border: 1px solid var(--primario); color: var(--primario); border-radius: 50px; }
+.btn-outline-primario:hover { background: var(--primario); color: #fff; }
+
+/* Navegación */
+.navbar-sitio { background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px); box-shadow: 0 2px 20px rgba(0, 0, 0, .05); }
+.navbar-sitio .nav-link { color: var(--oscuro); font-weight: 500; }
+.navbar-sitio .nav-link:hover { color: var(--primario); }
+.navbar-sitio .logo { max-height: 48px; width: auto; }
+.marca { font-size: 1.4rem; font-weight: 700; color: var(--oscuro); }
+
+/* Portada */
+.hero {
+    min-height: 92vh; display: flex; align-items: center; padding: 120px 0 80px;
+    background: linear-gradient(135deg, var(--primario), var(--oscuro)) center / cover no-repeat;
+    position: relative;
+}
+.hero-capa { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.55)); }
+.hero-eslogan { letter-spacing: .25em; text-transform: uppercase; font-size: .85rem; opacity: .9; }
+.hero-titulo { color: #fff; font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 700; }
+.hero-texto { max-width: 620px; margin: 1rem auto 0; font-size: 1.1rem; font-weight: 300; }
+
+/* Portada con el fondo ilustrado claro (assets/img/fondo_wonderlab_vino.svg) */
+.hero-claro { background-color: #f1ebea; }
+.hero-claro .hero-capa {
+    background: radial-gradient(ellipse 55% 50% at center, rgba(241, 235, 234, .94) 0%, rgba(241, 235, 234, .7) 55%, rgba(241, 235, 234, 0) 100%);
+}
+.hero-claro .hero-titulo { color: var(--oscuro); }
+.hero-claro .hero-eslogan { color: var(--primario); opacity: 1; font-weight: 600; }
+.hero-claro .hero-texto { color: #4a3538; font-weight: 400; }
+@media (max-width: 767px) {
+    .hero-claro .hero-capa { background: rgba(241, 235, 234, .8); }
+}
+
+/* Secciones */
+.seccion { padding: 90px 0; }
+.sobretitulo { color: var(--primario); text-transform: uppercase; letter-spacing: .2em; font-size: .8rem; font-weight: 600; }
+.titulo-seccion { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 600; margin-top: .3rem; }
+.texto-largo { line-height: 1.8; }
+
+/* Servicios */
+.servicio-card { border: 0; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.06); transition: transform .2s; }
+.servicio-card:hover { transform: translateY(-4px); }
+.servicio-card .card-img-top { height: 220px; object-fit: cover; }
+.imagen-vacia {
+    height: 220px; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #fff;
+    background: linear-gradient(135deg, var(--primario), var(--oscuro));
+}
+.nosotros-img { width: 100%; height: 440px; object-fit: cover; }
+.categoria { color: var(--primario); font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+.precio { font-weight: 600; color: var(--oscuro); font-size: 1.1rem; }
+
+/* Video */
+.video-marco { max-width: 900px; }
+
+/* Galería */
+.galeria-item { display: block; position: relative; border-radius: 14px; overflow: hidden; aspect-ratio: 1; }
+.galeria-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; }
+.galeria-item:hover img { transform: scale(1.06); }
+.galeria-item span {
+    position: absolute; left: 0; right: 0; bottom: 0; padding: .6rem .8rem; color: #fff; font-size: .85rem;
+    background: linear-gradient(transparent, rgba(0,0,0,.65));
+}
+
+/* Reserva */
+.reservar { background: linear-gradient(180deg, #fff, var(--suave)); }
+.reserva-card { max-width: 860px; border: 0; border-radius: 24px; box-shadow: 0 15px 50px rgba(0,0,0,.08); }
+.pasos { display: flex; justify-content: space-between; list-style: none; padding: 0; margin: 0 0 2rem; gap: .5rem; counter-reset: paso; }
+.pasos li { flex: 1; text-align: center; color: #aaa; font-size: .9rem; border-bottom: 3px solid #eee; padding-bottom: .7rem; }
+.pasos li span {
+    display: inline-flex; width: 26px; height: 26px; border-radius: 50%; align-items: center; justify-content: center;
+    background: #eee; color: #888; font-size: .8rem; margin-right: .3rem;
+}
+.pasos li.activo, .pasos li.hecho { color: var(--oscuro); border-color: var(--primario); }
+.pasos li.activo span, .pasos li.hecho span { background: var(--primario); color: #fff; }
+
+.opcion-servicio {
+    display: flex; flex-direction: column; width: 100%; padding: 1rem 1.2rem; cursor: pointer;
+    border: 1.5px solid #e8e0e2; border-radius: 14px; transition: all .15s;
+}
+.opcion-servicio small { color: #888; }
+.opcion-servicio:hover { border-color: var(--primario); }
+.btn-check:checked + .opcion-servicio { border-color: var(--primario); background: color-mix(in srgb, var(--primario) 8%, #fff); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primario) 18%, transparent); }
+
+.horas { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: .5rem; max-height: 300px; overflow-y: auto; }
+.horas .btn { border-radius: 10px; border: 1.5px solid #e8e0e2; font-size: .9rem; }
+.horas .btn:hover { border-color: var(--primario); color: var(--primario); }
+.horas .btn.activa { background: var(--primario); border-color: var(--primario); color: #fff; }
+.horas p { grid-column: 1 / -1; }
+
+.resumen { background: var(--suave); border-radius: 14px; padding: 1rem 1.2rem; }
+.campo-oculto { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.form-control:focus, .form-check-input:focus { border-color: var(--primario); box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--primario) 20%, transparent); }
+.form-check-input:checked { background-color: var(--primario); border-color: var(--primario); }
+
+.icono-ok {
+    width: 72px; height: 72px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;
+    background: var(--primario); color: #fff; font-size: 2.4rem;
+}
+
+/* Contacto */
+.contacto-lista li { display: flex; gap: .8rem; margin-bottom: .8rem; align-items: flex-start; }
+.contacto-lista i { color: var(--primario); font-size: 1.2rem; }
+.horario-tabla td { border-color: #f0e9eb; padding: .45rem 0; background: transparent; }
+.horario-tabla tr.hoy td { font-weight: 600; color: var(--primario); }
+.redes a {
+    display: inline-flex; width: 42px; height: 42px; border-radius: 50%; align-items: center; justify-content: center;
+    background: var(--primario); color: #fff; margin-right: .4rem; font-size: 1.1rem; text-decoration: none;
+}
+.redes a:hover { background: var(--oscuro); }
+.mapa { min-height: 360px; }
+.mapa iframe { width: 100%; height: 100%; min-height: 360px; border: 0; }
+
+/* Pie */
+.pie { background: var(--oscuro); color: rgba(255,255,255,.75); padding: 40px 0; }
+.pie .marca { color: #fff; }
+
+.whatsapp-flotante {
+    position: fixed; right: 20px; bottom: 20px; width: 58px; height: 58px; border-radius: 50%; z-index: 1000;
+    background: #25d366; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25); text-decoration: none;
+}
+.whatsapp-flotante:hover { color: #fff; transform: scale(1.06); }
+
+@media (max-width: 575px) {
+    .seccion { padding: 64px 0; }
+    .pasos li { font-size: .75rem; }
+    .pasos li span { display: flex; margin: 0 auto .3rem; }
+    .nosotros-img { height: 300px; }
+}

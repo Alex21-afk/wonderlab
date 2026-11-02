@@ -1,0 +1,8 @@
+# Solo se sirven archivos estáticos: nunca ejecutar scripts subidos
+Options -Indexes
+<FilesMatch "\.(php\d?|phtml|phar|pl|py|cgi|sh|html?|svg)$">
+    Require all denied
+</FilesMatch>
+<IfModule php_module>
+    php_flag engine off
+</IfModule>
