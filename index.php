@@ -26,6 +26,20 @@ $redes = array_filter([
     'tiktok'    => config('tiktok'),
 ], 'es_url_web');
 $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days'));
+
+// Carta de servicios agrupada por categoría, en el orden del panel
+$carta = [];
+foreach ($servicios as $s) {
+    $carta[(string)$s['categoria']][] = $s;
+}
+
+// Próximos días abiertos: son las uñas de la portada
+$diasAbiertos = [];
+for ($d = strtotime('today'); $servicios && count($diasAbiertos) < 6 && date('Y-m-d', $d) <= $fechaMax; $d = strtotime('+1 day', $d)) {
+    if (isset($horarioSemana[(int)date('w', $d)])) {
+        $diasAbiertos[] = $d;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -38,7 +52,7 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
     <?php if ($logo): ?><link rel="icon" href="<?= e(url($logo)) ?>"><?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= asset_url('assets/css/sitio.css') ?>" rel="stylesheet">
@@ -73,63 +87,70 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 
 <!-- Portada -->
 <?php $heroFoto = config('hero_imagen'); // si suben una foto en el panel, reemplaza al fondo ilustrado ?>
-<header id="inicio" class="hero <?= $heroFoto ? 'text-white' : 'hero-claro' ?>"
-        style="background-image: url('<?= e($heroFoto ? url($heroFoto) : url('assets/img/fondo_wonderlab_vino.svg')) ?>')">
-    <div class="hero-capa"></div>
-    <div class="container position-relative text-center">
+<header id="inicio" class="hero">
+    <div class="hero-texto-col">
         <p class="hero-eslogan"><?= e(config('eslogan')) ?></p>
         <h1 class="hero-titulo"><?= e(config('hero_titulo', $nombre)) ?></h1>
         <p class="hero-texto"><?= nl2br(e(config('hero_subtitulo'))) ?></p>
-        <a href="#reservar" class="btn btn-primario btn-lg px-5 mt-3"><i class="bi bi-calendar-heart me-2"></i><?= e(config('hero_boton', 'Reservar mi cita')) ?></a>
+        <a href="#reservar" class="btn btn-lg hero-boton px-5"><?= e(config('hero_boton', 'Reservar mi cita')) ?></a>
+    </div>
+    <div class="hero-visual <?= $heroFoto ? '' : 'hero-estampado' ?>" style="background-image: url('<?= e($heroFoto ? url($heroFoto) : url('assets/img/fondo_wonderlab_vino.svg')) ?>')">
+        <?php if ($diasAbiertos): ?>
+            <p class="dias-titulo">Elige tu día</p>
+            <div class="unas">
+                <?php foreach ($diasAbiertos as $d): ?>
+                    <a href="#reservar" class="una" data-fecha="<?= date('Y-m-d', $d) ?>" aria-label="Reservar el <?= e(fecha_humana(date('Y-m-d', $d), false)) ?>">
+                        <span class="una-dia"><?= e(mb_substr(DIAS_SEMANA[(int)date('w', $d)], 0, 3)) ?></span>
+                        <span class="una-numero"><?= date('j', $d) ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
     </div>
 </header>
 
 <!-- Servicios -->
 <section id="servicios" class="seccion">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="sobretitulo">Lo que hacemos</span>
-            <h2 class="titulo-seccion">Nuestros servicios</h2>
-        </div>
-        <div class="row g-4">
-            <?php foreach ($servicios as $s): ?>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="card servicio-card h-100">
-                        <?php if ($s['imagen']): ?>
-                            <img src="<?= e(url($s['imagen'])) ?>" class="card-img-top" alt="<?= e($s['nombre']) ?>" loading="lazy">
-                        <?php else: ?>
-                            <div class="imagen-vacia"><i class="bi bi-stars"></i></div>
-                        <?php endif; ?>
-                        <div class="card-body d-flex flex-column">
-                            <?php if ($s['categoria']): ?><span class="categoria"><?= e($s['categoria']) ?></span><?php endif; ?>
-                            <h3 class="h5 mt-1"><?= e($s['nombre']) ?></h3>
-                            <p class="text-muted small flex-grow-1"><?= nl2br(e($s['descripcion'])) ?></p>
-                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                <span class="small text-muted"><i class="bi bi-clock me-1"></i><?= duracion_texto((int)$s['duracion_min']) ?></span>
-                                <?php if ((float)$s['precio'] > 0): ?><span class="precio"><?= e(dinero($s['precio'])) ?></span><?php endif; ?>
+        <h2 class="titulo-seccion">Nuestros servicios</h2>
+        <?php foreach ($carta as $categoria => $lista): ?>
+            <div class="carta-grupo">
+                <h3 class="carta-categoria"><?= e($categoria !== '' ? (string)$categoria : 'Más servicios') ?></h3>
+                <ul class="carta-lista">
+                    <?php foreach ($lista as $s): ?>
+                        <li class="carta-item <?= $s['imagen'] ? 'con-foto' : '' ?>">
+                            <?php if ($s['imagen']): ?>
+                                <img src="<?= e(url($s['imagen'])) ?>" class="carta-foto" alt="" loading="lazy">
+                            <?php endif; ?>
+                            <div class="carta-texto">
+                                <h4 class="carta-nombre"><?= e($s['nombre']) ?></h4>
+                                <?php if ($s['descripcion']): ?><p class="carta-descripcion"><?= nl2br(e($s['descripcion'])) ?></p><?php endif; ?>
                             </div>
-                            <a href="#reservar" class="btn btn-outline-primario mt-3 elegir-servicio" data-servicio="<?= (int)$s['id'] ?>">Reservar</a>
-                        </div>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+                            <div class="carta-datos">
+                                <?php if ((float)$s['precio'] > 0): ?><span class="precio"><?= e(dinero($s['precio'])) ?></span><?php endif; ?>
+                                <span><?= duracion_texto((int)$s['duracion_min']) ?></span>
+                            </div>
+                            <a href="#reservar" class="btn btn-outline-primario elegir-servicio" data-servicio="<?= (int)$s['id'] ?>" aria-label="Reservar <?= e($s['nombre']) ?>">Reservar</a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endforeach; ?>
     </div>
 </section>
 
 <!-- Nosotros -->
-<section id="nosotros" class="seccion bg-suave">
+<section id="nosotros" class="seccion nosotros">
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
                 <?php if (config('nosotros_imagen')): ?>
-                    <img src="<?= e(url(config('nosotros_imagen'))) ?>" class="img-fluid rounded-4 shadow nosotros-img" alt="<?= e(config('nosotros_titulo')) ?>" loading="lazy">
+                    <img src="<?= e(url(config('nosotros_imagen'))) ?>" class="nosotros-img" alt="<?= e(config('nosotros_titulo')) ?>" loading="lazy">
                 <?php else: ?>
-                    <div class="imagen-vacia rounded-4 nosotros-img"><i class="bi bi-flower1"></i></div>
+                    <div class="nosotros-img"></div>
                 <?php endif; ?>
             </div>
             <div class="col-lg-6">
-                <span class="sobretitulo">Conócenos</span>
                 <h2 class="titulo-seccion mb-4"><?= e(config('nosotros_titulo', 'Sobre nosotras')) ?></h2>
                 <div class="texto-largo"><?= nl2br(e(config('nosotros_texto'))) ?></div>
                 <a href="#reservar" class="btn btn-primario mt-4 px-4">Agenda tu visita</a>
@@ -142,17 +163,15 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 <!-- Video -->
 <section id="video" class="seccion">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="titulo-seccion"><?= e(config('video_titulo', 'Conoce nuestro estudio')) ?></h2>
-        </div>
-        <div class="video-marco mx-auto">
+        <h2 class="titulo-seccion"><?= e(config('video_titulo', 'Conoce nuestro estudio')) ?></h2>
+        <div class="video-marco">
             <?php if ($youtube): ?>
-                <div class="ratio ratio-16x9 rounded-4 overflow-hidden shadow">
+                <div class="ratio ratio-16x9 rounded-2 overflow-hidden">
                     <iframe src="https://www.youtube-nocookie.com/embed/<?= e($youtube) ?>" title="Video" loading="lazy"
                             allow="accelerometer; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             <?php else: ?>
-                <video class="w-100 rounded-4 shadow" controls preload="metadata" playsinline>
+                <video class="w-100 rounded-2" controls preload="metadata" playsinline>
                     <source src="<?= e(url($videoArchivo)) ?>">
                 </video>
             <?php endif; ?>
@@ -163,12 +182,9 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 
 <?php if ($galeria): ?>
 <!-- Galería -->
-<section id="galeria" class="seccion <?= ($youtube || $videoArchivo) ? 'bg-suave' : '' ?>">
+<section id="galeria" class="seccion">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="sobretitulo">Nuestro trabajo</span>
-            <h2 class="titulo-seccion">Galería</h2>
-        </div>
+        <h2 class="titulo-seccion">Galería</h2>
         <div class="row g-3">
             <?php foreach ($galeria as $g): ?>
                 <div class="col-6 col-md-4 col-lg-3">
@@ -186,9 +202,9 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 <!-- Reservar -->
 <section id="reservar" class="seccion reservar">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="sobretitulo">En línea, en menos de un minuto</span>
+        <div class="reservar-cabecera mx-auto">
             <h2 class="titulo-seccion">Reserva tu cita</h2>
+            <p class="reservar-intro">En línea, en menos de un minuto.</p>
         </div>
 
         <div class="card reserva-card mx-auto">
@@ -202,7 +218,7 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
                     <li data-paso-indicador="3"><span>3</span> Tus datos</li>
                 </ol>
 
-                <form id="formReserva" novalidate data-api="<?= e(url('api')) ?>">
+                <form id="formReserva" novalidate data-api="<?= e(url('api')) ?>" data-min="<?= date('Y-m-d') ?>" data-max="<?= $fechaMax ?>" data-abiertos="<?= e(json_encode(array_keys($horarioSemana))) ?>">
                     <!-- Paso 1 -->
                     <div class="paso" data-paso="1">
                         <div class="row g-3">
@@ -217,6 +233,7 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                        <p class="dia-elegido d-none" id="diaElegido"></p>
                         <div class="text-end mt-4">
                             <button type="button" class="btn btn-primario px-4" data-ir="2" disabled id="btnPaso2">Continuar <i class="bi bi-arrow-right"></i></button>
                         </div>
@@ -225,14 +242,20 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
                     <!-- Paso 2 -->
                     <div class="paso d-none" data-paso="2">
                         <div class="row g-4">
-                            <div class="col-md-5">
-                                <label for="fecha" class="form-label fw-medium">Elige el día</label>
-                                <input type="date" class="form-control form-control-lg" id="fecha" name="fecha"
-                                       min="<?= date('Y-m-d') ?>" max="<?= $fechaMax ?>">
+                            <div class="col-md-6">
+                                <p class="form-label fw-medium">Elige el día</p>
+                                <div class="mes-cabecera">
+                                    <button type="button" class="mes-nav" id="mesAnterior" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
+                                    <span class="mes-titulo" id="mesTitulo" aria-live="polite"></span>
+                                    <button type="button" class="mes-nav" id="mesSiguiente" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
+                                </div>
+                                <div class="mes-semana" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+                                <div class="mes-dias" id="mesDias"></div>
+                                <input type="hidden" id="fecha" name="fecha">
                                 <p class="small text-muted mt-2 mb-0" id="servicioElegido"></p>
                             </div>
-                            <div class="col-md-7">
-                                <label class="form-label fw-medium">Horarios disponibles</label>
+                            <div class="col-md-6">
+                                <p class="form-label fw-medium">Horarios disponibles</p>
                                 <div id="horas" class="horas"><p class="text-muted small">Primero elige un día.</p></div>
                                 <input type="hidden" name="hora" id="hora">
                             </div>
@@ -293,46 +316,40 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 </section>
 
 <!-- Contacto -->
-<section id="contacto" class="seccion bg-suave">
+<section id="contacto" class="seccion">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="sobretitulo">Te esperamos</span>
-            <h2 class="titulo-seccion">Contacto y horarios</h2>
-        </div>
-        <div class="row g-4">
-            <div class="col-lg-<?= $mapa ? '5' : '12' ?>">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <ul class="list-unstyled contacto-lista mb-4">
-                            <?php if (config('direccion')): ?><li><i class="bi bi-geo-alt"></i><?= e(config('direccion')) ?></li><?php endif; ?>
-                            <?php if (config('telefono')): ?><li><i class="bi bi-telephone"></i><a href="tel:<?= e(preg_replace('/[^\d+]/', '', config('telefono'))) ?>"><?= e(config('telefono')) ?></a></li><?php endif; ?>
-                            <?php if ($whatsapp): ?><li><i class="bi bi-whatsapp"></i><a href="<?= e($whatsapp) ?>" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></li><?php endif; ?>
-                            <?php if (config('email')): ?><li><i class="bi bi-envelope"></i><a href="mailto:<?= e(config('email')) ?>"><?= e(config('email')) ?></a></li><?php endif; ?>
-                        </ul>
-                        <h3 class="h6 text-uppercase fw-semibold mb-3">Horario de atención</h3>
-                        <table class="table table-sm horario-tabla mb-0">
-                            <?php foreach ([1, 2, 3, 4, 5, 6, 0] as $dia): ?>
-                                <tr class="<?= (int)date('w') === $dia ? 'hoy' : '' ?>">
-                                    <td><?= DIAS_SEMANA[$dia] ?></td>
-                                    <td class="text-end"><?= isset($horarioSemana[$dia]) ? e(implode(', ', $horarioSemana[$dia])) : '<span class="text-muted">Cerrado</span>' ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </table>
-                        <?php if ($redes): ?>
-                            <div class="redes mt-4">
-                                <?php foreach ($redes as $red => $enlace): ?>
-                                    <a href="<?= e($enlace) ?>" target="_blank" rel="noopener" aria-label="<?= e($red) ?>"><i class="bi bi-<?= $red ?>"></i></a>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
+        <h2 class="titulo-seccion">Contacto y horarios</h2>
+        <div class="contacto-grid <?= $mapa ? 'con-mapa' : '' ?>">
+            <div>
+                <h3 class="contacto-subtitulo">Encuéntranos</h3>
+                <ul class="list-unstyled contacto-lista mb-4">
+                    <?php if (config('direccion')): ?><li><i class="bi bi-geo-alt"></i><?= e(config('direccion')) ?></li><?php endif; ?>
+                    <?php if (config('telefono')): ?><li><i class="bi bi-telephone"></i><a href="tel:<?= e(preg_replace('/[^\d+]/', '', config('telefono'))) ?>"><?= e(config('telefono')) ?></a></li><?php endif; ?>
+                    <?php if ($whatsapp): ?><li><i class="bi bi-whatsapp"></i><a href="<?= e($whatsapp) ?>" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></li><?php endif; ?>
+                    <?php if (config('email')): ?><li><i class="bi bi-envelope"></i><a href="mailto:<?= e(config('email')) ?>"><?= e(config('email')) ?></a></li><?php endif; ?>
+                </ul>
+                <?php if ($redes): ?>
+                    <div class="redes">
+                        <?php foreach ($redes as $red => $enlace): ?>
+                            <a href="<?= e($enlace) ?>" target="_blank" rel="noopener" aria-label="<?= e($red) ?>"><i class="bi bi-<?= $red ?>"></i></a>
+                        <?php endforeach; ?>
                     </div>
-                </div>
+                <?php endif; ?>
+            </div>
+            <div>
+                <h3 class="contacto-subtitulo">Horario de atención</h3>
+                <table class="table table-sm horario-tabla mb-0">
+                    <?php foreach ([1, 2, 3, 4, 5, 6, 0] as $dia): ?>
+                        <tr class="<?= (int)date('w') === $dia ? 'hoy' : '' ?>">
+                            <td><?= DIAS_SEMANA[$dia] ?></td>
+                            <td class="text-end"><?= isset($horarioSemana[$dia]) ? e(implode(', ', $horarioSemana[$dia])) : '<span class="text-muted">Cerrado</span>' ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
             </div>
             <?php if ($mapa): ?>
-                <div class="col-lg-7">
-                    <div class="mapa rounded-4 overflow-hidden shadow-sm h-100">
-                        <iframe src="<?= e($mapa) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa"></iframe>
-                    </div>
+                <div class="mapa">
+                    <iframe src="<?= e($mapa) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Mapa"></iframe>
                 </div>
             <?php endif; ?>
         </div>
@@ -340,7 +357,7 @@ $fechaMax = date('Y-m-d', strtotime('+' . (int)config('dias_max', '60') . ' days
 </section>
 
 <footer class="pie">
-    <div class="container text-center">
+    <div class="container">
         <p class="marca mb-2"><?= e($nombre) ?></p>
         <p class="small mb-0">© <?= date('Y') ?> <?= e($nombre) ?>. <?= e(config('pie_texto')) ?></p>
     </div>

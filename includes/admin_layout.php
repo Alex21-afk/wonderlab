@@ -26,6 +26,7 @@ function admin_inicio(string $titulo, string $activo, string $head = ''): void
     <meta name="robots" content="noindex">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title><?= e($titulo) ?> | Panel <?= e($nombre) ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= asset_url('assets/css/admin.css') ?>" rel="stylesheet">
@@ -67,7 +68,7 @@ function admin_inicio(string $titulo, string $activo, string $head = ''): void
         </div>
     </aside>
     <main class="contenido flex-grow-1">
-        <h1 class="h3 mb-4"><?= e($titulo) ?></h1>
+        <h1 class="titulo-panel"><?= e($titulo) ?></h1>
         <?= flash_html() ?>
 <?php
 }

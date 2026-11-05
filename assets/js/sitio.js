@@ -40,6 +40,7 @@
         if (n === 2) {
             const s = servicioElegido();
             document.getElementById('servicioElegido').textContent = `${s.dataset.nombre} · ${s.dataset.detalle}`;
+            pintarMes();
         }
         if (n === 3) mostrarResumen();
         document.getElementById('reservar').scrollIntoView({ behavior: 'smooth' });
@@ -68,6 +69,79 @@
         if (radio) {
             radio.checked = true;
             radio.dispatchEvent(new Event('change'));
+            irAPaso(1);
+        }
+    }));
+
+    // ---------- Calendario ----------
+    const fechaMin = form.dataset.min;
+    const fechaMax = form.dataset.max;
+    const diasAbiertos = JSON.parse(form.dataset.abiertos);
+    const mesDias = document.getElementById('mesDias');
+    const mesAnterior = document.getElementById('mesAnterior');
+    const mesSiguiente = document.getElementById('mesSiguiente');
+    const diaElegido = document.getElementById('diaElegido');
+    const dos = n => String(n).padStart(2, '0');
+    const aFecha = texto => { const [a, m, d] = texto.split('-').map(Number); return new Date(a, m - 1, d); };
+    const clave = (a, m, d) => `${a}-${dos(m + 1)}-${dos(d)}`;
+    const diaLargo = texto => aFecha(texto).toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    let mes = aFecha(fechaMin);
+    mes.setDate(1);
+
+    function pintarMes() {
+        const a = mes.getFullYear();
+        const m = mes.getMonth();
+        document.getElementById('mesTitulo').textContent = mes.toLocaleDateString('es', { month: 'long', year: 'numeric' });
+        mesAnterior.disabled = clave(a, m, 1) <= fechaMin;
+        mesSiguiente.disabled = clave(a, m + 1, 1) > fechaMax;
+
+        mesDias.innerHTML = '';
+        for (let i = (mes.getDay() + 6) % 7; i > 0; i--) mesDias.appendChild(document.createElement('span')); // la semana empieza en lunes
+        const total = new Date(a, m + 1, 0).getDate();
+        for (let d = 1; d <= total; d++) {
+            const valor = clave(a, m, d);
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'dia';
+            b.textContent = d;
+            b.dataset.fecha = valor;
+            b.setAttribute('aria-label', diaLargo(valor));
+            b.setAttribute('aria-pressed', valor === fecha.value);
+            b.disabled = valor < fechaMin || valor > fechaMax || !diasAbiertos.includes(new Date(a, m, d).getDay());
+            b.classList.toggle('hoy', valor === fechaMin);
+            b.classList.toggle('activo', valor === fecha.value);
+            mesDias.appendChild(b);
+        }
+    }
+
+    function elegirFecha(valor) {
+        fecha.value = valor;
+        mes = aFecha(valor);
+        mes.setDate(1);
+        pintarMes();
+        cargarHoras();
+    }
+
+    mesDias.addEventListener('click', ev => {
+        const b = ev.target.closest('.dia');
+        if (!b) return;
+        elegirFecha(b.dataset.fecha);
+        mesDias.querySelector('.dia.activo').focus();
+    });
+    [[mesAnterior, -1], [mesSiguiente, 1]].forEach(([b, paso]) => b.addEventListener('click', () => {
+        mes.setMonth(mes.getMonth() + paso);
+        pintarMes();
+    }));
+
+    // Uñas de la portada: guardan el día y llevan a la reserva
+    document.querySelectorAll('.una').forEach(a => a.addEventListener('click', () => {
+        elegirFecha(a.dataset.fecha);
+        if (servicioElegido()) {
+            irAPaso(2);
+        } else {
+            diaElegido.textContent = `Reservarás el ${diaLargo(a.dataset.fecha)}. Elige el servicio para ver los horarios.`;
+            diaElegido.classList.remove('d-none');
             irAPaso(1);
         }
     }));
@@ -102,12 +176,10 @@
             limpiarHoras('No se pudieron cargar los horarios. Inténtalo de nuevo.');
         }
     }
-    fecha.addEventListener('change', cargarHoras);
 
     function mostrarResumen() {
         const s = servicioElegido();
-        const [a, m, d] = fecha.value.split('-').map(Number);
-        const dia = new Date(a, m - 1, d).toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+        const dia = diaLargo(fecha.value);
         const resumen = document.getElementById('resumen');
         resumen.innerHTML = '';
         const titulo = document.createElement('strong');
@@ -168,6 +240,8 @@
 
         form.reset();
         form.classList.remove('was-validated');
+        fecha.value = ''; // reset() no limpia los campos ocultos
+        diaElegido.classList.add('d-none');
         btnPaso2.disabled = true;
         limpiarHoras('Primero elige un día.');
         irAPaso(1);

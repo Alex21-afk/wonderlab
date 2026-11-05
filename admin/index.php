@@ -5,10 +5,10 @@ requiere_login();
 
 $pdo = db();
 $stats = [
-    ['Citas hoy', 'bi-calendar-day', $pdo->query("SELECT COUNT(*) FROM citas WHERE DATE(inicio) = CURDATE() AND estado IN ('pendiente','confirmada')")->fetchColumn()],
-    ['Por confirmar', 'bi-hourglass-split', $pdo->query("SELECT COUNT(*) FROM citas WHERE estado = 'pendiente' AND inicio >= NOW()")->fetchColumn()],
-    ['Próximos 7 días', 'bi-calendar-week', $pdo->query("SELECT COUNT(*) FROM citas WHERE inicio BETWEEN NOW() AND NOW() + INTERVAL 7 DAY AND estado IN ('pendiente','confirmada')")->fetchColumn()],
-    ['Ingresos del mes', 'bi-cash-coin', dinero($pdo->query("SELECT COALESCE(SUM(precio), 0) FROM citas WHERE estado = 'completada' AND YEAR(inicio) = YEAR(CURDATE()) AND MONTH(inicio) = MONTH(CURDATE())")->fetchColumn())],
+    ['Citas hoy', $pdo->query("SELECT COUNT(*) FROM citas WHERE DATE(inicio) = CURDATE() AND estado IN ('pendiente','confirmada')")->fetchColumn()],
+    ['Por confirmar', $pdo->query("SELECT COUNT(*) FROM citas WHERE estado = 'pendiente' AND inicio >= NOW()")->fetchColumn()],
+    ['Próximos 7 días', $pdo->query("SELECT COUNT(*) FROM citas WHERE inicio BETWEEN NOW() AND NOW() + INTERVAL 7 DAY AND estado IN ('pendiente','confirmada')")->fetchColumn()],
+    ['Ingresos del mes', dinero($pdo->query("SELECT COALESCE(SUM(precio), 0) FROM citas WHERE estado = 'completada' AND YEAR(inicio) = YEAR(CURDATE()) AND MONTH(inicio) = MONTH(CURDATE())")->fetchColumn())],
 ];
 $citasHoy = $pdo->query("SELECT * FROM citas WHERE DATE(inicio) = CURDATE() AND estado <> 'cancelada' ORDER BY inicio")->fetchAll();
 $rango = $pdo->query('SELECT MIN(hora_inicio) AS desde, MAX(hora_fin) AS hasta FROM horarios')->fetch();
@@ -16,16 +16,11 @@ $rango = $pdo->query('SELECT MIN(hora_inicio) AS desde, MAX(hora_fin) AS hasta F
 admin_inicio('Agenda', 'agenda', '<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/es.global.min.js"></script>');
 ?>
-<div class="row g-3 mb-4">
-    <?php foreach ($stats as [$texto, $icono, $valor]): ?>
-        <div class="col-6 col-xl-3">
-            <div class="card h-100"><div class="card-body stat">
-                <div class="stat-icono"><i class="bi <?= $icono ?>"></i></div>
-                <div><div class="stat-valor"><?= e((string)$valor) ?></div><div class="stat-texto"><?= $texto ?></div></div>
-            </div></div>
-        </div>
+<dl class="cifras">
+    <?php foreach ($stats as [$texto, $valor]): ?>
+        <div><dd><?= e((string)$valor) ?></dd><dt><?= $texto ?></dt></div>
     <?php endforeach; ?>
-</div>
+</dl>
 
 <div class="row g-4">
     <div class="col-xl-8">

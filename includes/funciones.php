@@ -237,18 +237,17 @@ const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Vier
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 const ESTADOS_CITA = [
-    'pendiente'  => ['Pendiente', 'warning', '#f0ad4e'],
-    'confirmada' => ['Confirmada', 'success', '#2e9e5b'],
-    'completada' => ['Completada', 'primary', '#3b6fd8'],
-    'no_asistio' => ['No asistió', 'danger', '#d9534f'],
-    'cancelada'  => ['Cancelada', 'secondary', '#9aa0a6'],
+    'pendiente'  => ['Pendiente', 'warning', '#a86a12'],
+    'confirmada' => ['Confirmada', 'success', '#3f7a5a'],
+    'completada' => ['Completada', 'primary', '#3f6488'],
+    'no_asistio' => ['No asistió', 'danger', '#b0413a'],
+    'cancelada'  => ['Cancelada', 'secondary', '#857a7c'],
 ];
 
 function estado_badge(string $estado): string
 {
-    [$texto, $color] = ESTADOS_CITA[$estado] ?? [$estado, 'secondary'];
-    $claseTexto = $color === 'warning' ? ' text-dark' : '';
-    return '<span class="badge text-bg-' . $color . $claseTexto . '">' . e($texto) . '</span>';
+    [$texto, , $color] = ESTADOS_CITA[$estado] ?? [$estado, 'secondary', '#857a7c'];
+    return '<span class="estado" style="--estado: ' . $color . '">' . e($texto) . '</span>';
 }
 
 function fecha_humana(string $fecha, bool $conHora = true): string

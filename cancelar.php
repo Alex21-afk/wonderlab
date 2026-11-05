@@ -27,13 +27,13 @@ $whatsapp = whatsapp_url(config('whatsapp'), $cita ? 'Hola, necesito ayuda con m
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Mi cita | <?= e($nombre) ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Gloock&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="<?= asset_url('assets/css/sitio.css') ?>" rel="stylesheet">
     <?= estilos_marca() ?>
 </head>
-<body class="bg-suave d-flex align-items-center min-vh-100">
+<body class="pagina-cita d-flex align-items-center min-vh-100">
 <div class="container py-5">
     <div class="card reserva-card mx-auto" style="max-width: 520px">
         <div class="card-body p-4 p-md-5 text-center">
